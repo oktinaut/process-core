@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "target": "ES2018",
+        "module": "CommonJS",
+        "moduleResolution": "node",
+        "outDir": "build",
+        "declaration": true,
+        "declarationDir": "build",
+        "strict": true
+    }
+}

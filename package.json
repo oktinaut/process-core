@@ -1,0 +1,27 @@
+{
+  "name": "process-core",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "scripts": {
+    "build": "rm -rf build && tsc",
+    "bundle": "webpack",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "eventemitter3": "^4.0.4",
+    "xml-js": "^1.6.11"
+  },
+  "devDependencies": {
+    "@types/uuid": "^8.0.1",
+    "clean-webpack-plugin": "^3.0.0",
+    "ts-loader": "^8.0.2",
+    "typescript": "^3.9.7",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12",
+    "webpack-fix-default-import-plugin": "^1.0.3"
+  }
+}
