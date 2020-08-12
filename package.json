@@ -5,6 +5,7 @@
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {
+    "postinstall": "npm run build",
     "build": "rm -rf build && tsc",
     "bundle": "webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
