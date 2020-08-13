@@ -8,6 +8,7 @@ export type ProcessNode
     | EndEvent
     | ServiceTask
     | UserTask
+    | ScriptTask
     | SplitGateway
     | JoinGateway
 
@@ -26,14 +27,21 @@ export type StartEvent = CommonNode & {
 
 export type ServiceTask = CommonNode & {
     type: "service"
-    parameters?: Record<string, any>
     next: string
+    errorNext?: string
 }
 
 export type UserTask = CommonNode & {
     type: "user"
-    parameters?: Record<string, any>
     next: string
+    errorNext?: string
+}
+
+export type ScriptTask = CommonNode & {
+    type: "script"
+    script: string
+    next: string
+    errorNext?: string
 }
 
 export type EndEvent = CommonNode & {

@@ -1,6 +1,6 @@
 import { xml2json, Element } from "xml-js"
 
-import { StartEvent, EndEvent, Process, ServiceTask, UserTask, SplitGateway, JoinGateway } from "./process"
+import { StartEvent, EndEvent, Process, ServiceTask, UserTask, SplitGateway, JoinGateway, ScriptTask } from "./process"
 
 type SequenceFlow = {
     attributes: { sourceRef: string, targetRef: string }
@@ -67,6 +67,25 @@ export const loadProcess = async (path: string) => {
         return nextNodes
     }
 
+    const findErrorBoundaryNext = (source: Element) => {
+
+        const errorBoundary = nodeDefs.find(elem => 
+            elem.name === "bpmn:boundaryEvent" && 
+            elem.attributes?.attachedToRef === source.attributes?.id &&
+            elem.elements?.find(elem => elem.name === "bpmn:errorEventDefinition")
+        )
+
+        const outgoing = errorBoundary?.elements?.find(elem => elem.name === "bpmn:outgoing")
+
+        const flowId = outgoing?.elements?.[0].text
+
+        const sequenceFlow = nodeDefs.find(
+            elem => elem.name === "bpmn:sequenceFlow" && elem.attributes?.id === flowId
+        ) as SequenceFlow
+
+        return sequenceFlow?.attributes?.targetRef
+    }
+
     const startEvents = nodeDefs
         .filter((elem: Element) => elem.name === "bpmn:startEvent")
         .map((elem: Element) => {
@@ -106,7 +125,7 @@ export const loadProcess = async (path: string) => {
                 type: "service",
                 id: id,
                 next: findNext(elem),
-                parameters: {}, // TODO
+                errorNext: findErrorBoundaryNext(elem),
             }
 
             return serviceTask
@@ -122,7 +141,7 @@ export const loadProcess = async (path: string) => {
                 type: "user",
                 id: id,
                 next: findNext(elem),
-                parameters: {}, // TODO
+                errorNext: findErrorBoundaryNext(elem),
             }
 
             return userTask
@@ -164,7 +183,28 @@ export const loadProcess = async (path: string) => {
             return joinGateway
         })
 
-    console.log(processData)
+    const scriptTasks = nodeDefs
+        .filter((elem: Element) => elem.name === "bpmn:scriptTask")
+        .map((elem: Element) => {
+
+            const id = elem.attributes?.id as string
+
+            const script = elem.elements
+                ?.find(elem => elem.name === "bpmn:script")
+                ?.elements?.[0]?.text as string
+                ?? ""
+
+            const scriptTask: ScriptTask = {
+                type: "script",
+                id,
+                script,
+                next: findNext(elem),
+                errorNext: findErrorBoundaryNext(elem),
+            }
+
+            return scriptTask
+        })
+
     console.log(nodeDefs)
 
     const process: Process = {
@@ -175,6 +215,7 @@ export const loadProcess = async (path: string) => {
             ...userTasks,
             ...splitGateways,
             ...joinGateways,
+            ...scriptTasks,
         ]
     }
 
