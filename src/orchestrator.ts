@@ -6,7 +6,7 @@ import { Process, ProcessNode, NodeWithNext, StartEvent, ScriptTask } from "./pr
 
 export type Token = {
     payload: Record<string, any>
-    key: string
+    id: string
     error?: Error
 }
 
@@ -18,10 +18,15 @@ export const updatePayload = (token: Token, payload: Record<string, any>): Token
 }
 
 export type TaskRequest = {
-    type: "service" | "user"
+    type: string
     id: string
-    token: Token
+    token?: Token
 }
+
+// type EventHookTask = (event: "task", listener: (task: TaskRequest | undefined) => void) => void
+// type EventHookEnd = (event: "end", listener: (eventName: String) => void) => void
+
+// type EventHook = EventHookTask | EventHookEnd
 
 export type Orchestrator = {
 
@@ -29,40 +34,46 @@ export type Orchestrator = {
 
     advance: (token: Token, error?: Error) => void
 
-    addEventListener: (event: "task", listener: (task: TaskRequest | undefined) => void) => void
+    addEventListener: <T>(event: string, listener: (detail: T) => void) => void
 
-    removeEventListener: (event: "task", listener: (task: TaskRequest | undefined) => void) => void
+    removeEventListener: <T>(event: string, listener: (detail: T) => void) => void
+
+    // addEventListener: (event: "task", listener: (task: TaskRequest | undefined) => void) => void
+
+    // removeEventListener: (event: "task", listener: (task: TaskRequest | undefined) => void) => void
+
 }
 
 export const createOrchestrator = (process: Process) => {
 
     const events = new EventEmitter()
 
-    let validTokenKey: string | undefined
-
-    let currentNode: ProcessNode | undefined
-
     let tokenState: Record<string, ProcessNode> = {}
 
     const evaluateNode = (node: ProcessNode, token: Token) => {
 
-        tokenState[token.key] = node
-    
-        switch (node.type) {
+        tokenState[token.id] = node
+
+        const { type, id } = node
+
+        let taskRequest: TaskRequest = {
+            type,
+            id,
+        }
+
+        switch (type) {
             case "service": 
             case "user": {
 
-                const { type, id } = node
-
-                const taskRequest: TaskRequest = {
-                    type,
-                    id,
-                    token: token,
-                }
+                taskRequest.token = token
     
                 events.emit("task", taskRequest)
+
+                break
             }
             case "script": {
+
+                events.emit("task", taskRequest)
 
                 const code = compileCode((node as ScriptTask).script)
 
@@ -77,9 +88,22 @@ export const createOrchestrator = (process: Process) => {
                 } catch (error) {
                     evaluateNextNode(node, token, error)
                 }
+
+                break
+            }
+            case "end": {
+
+                events.emit("end", id)
+
+                break
             }
             default: {
+
+                events.emit("task", taskRequest)
+
                 evaluateNextNode(node, token)
+
+                break
             }
         }
     }
@@ -93,7 +117,9 @@ export const createOrchestrator = (process: Process) => {
         return nextNode
     }
 
-    const evaluateNextNodeBetter = (node: ProcessNode, token: Token, error?: Error) => {
+    const evaluateNextNode = (node: ProcessNode, token: Token, error?: Error) => {
+
+        delete tokenState[token.id]
 
         if (error) {
 
@@ -107,49 +133,24 @@ export const createOrchestrator = (process: Process) => {
                 return
             }
 
-            token.error = error
+            const id = createID()
 
-            evaluateNextNode(nextNode, token)
+            const tokenWithError = Object.assign({}, token, { id, error })
 
-            return
-        }
-
-    }
-
-    const evaluateNextNode = (fromNode: ProcessNode, token: Token, error?: Error) => {
-
-        if (error) {
-
-            if (!fromNode.hasOwnProperty("errorNext")) {
-                return
-            }
-
-            const nextNodeId = (fromNode as any).errorNext as string
-
-            const nextNode = process.nodes.find(
-                node => node.id == nextNodeId
-            )
-
-            if (nextNode === undefined) {
-                return
-            }
-
-            token.error = error
-
-            evaluateNextNode(nextNode, token)
+            evaluateNode(nextNode, tokenWithError)
 
             return
         }
 
-        if (!fromNode.hasOwnProperty("next")) {
+        if (!node.hasOwnProperty("next")) {
             return
         }
 
         let nextNodeId: string | undefined
 
-        if (fromNode.type === "split") {
+        if (node.type === "split") {
 
-            nextNodeId = fromNode.next
+            nextNodeId = node.next
                 .filter(next => next.condition.length > 0)
                 .find(next => {
 
@@ -162,14 +163,14 @@ export const createOrchestrator = (process: Process) => {
 
             if (!nextNodeId) {
 
-                nextNodeId = fromNode.next
+                nextNodeId = node.next
                     .find(next => next.condition.length === 0)
                     ?.id
             }
 
         } else {
 
-            const nodeWithNext = fromNode as NodeWithNext
+            const nodeWithNext = node as NodeWithNext
 
             nextNodeId = nodeWithNext.next
         }
@@ -182,42 +183,11 @@ export const createOrchestrator = (process: Process) => {
             return
         }
 
-        currentNode = nextNode
+        const id = createID()
 
-        if (nextNode.type === "service" || nextNode.type === "user") {
+        const nextToken = Object.assign({}, token, { id })
 
-            validTokenKey = createID()
-
-            const { type, id } = nextNode
-
-            const nextToken = Object.assign({}, token, { key: validTokenKey })
-
-            const taskRequest: TaskRequest = {
-                type,
-                id,
-                token: nextToken,
-            }
-
-            events.emit("task", taskRequest)
-
-        } else {
-
-            events.emit("task")
-
-            if (nextNode.type === "script") {
-
-                const code = compileCode(nextNode.script)
-
-                const updatedPayload = code({ payload: token.payload })
-                
-                const updatedToken = updatePayload(token, updatedPayload)
-
-                evaluateNextNode(nextNode, updatedToken)
-
-            } else {
-                evaluateNextNode(nextNode, token)
-            }
-        }
+        evaluateNode(nextNode, nextToken)
     }
 
     const orchestrator: Orchestrator = {
@@ -233,7 +203,7 @@ export const createOrchestrator = (process: Process) => {
             }
 
             const initialToken: Token = {
-                key: createID(),
+                id: createID(),
                 payload: {},
             }
 
@@ -242,22 +212,20 @@ export const createOrchestrator = (process: Process) => {
 
         advance: (token, error) => {
 
-            if (token.key !== validTokenKey) {
-                throw Error("Token key is invalid")
-            }
+            const currentNode = tokenState[token.id]
 
             if (!currentNode) {
                 throw Error("Current node is undefined")
             }
 
-            evaluateNextNode(currentNode, token)
+            evaluateNextNode(currentNode, token, error)
         },
 
-        addEventListener: (event, listener) => {
+        addEventListener: <T>(event: string, listener: (detail: T) => void) => {
             events.addListener(event, listener)
         },
 
-        removeEventListener: (event, listener) => {
+        removeEventListener: <T>(event: string, listener: (detail: T) => void) => {
             events.removeListener(event, listener)
         },
     }

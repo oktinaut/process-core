@@ -12,6 +12,13 @@ export const loadProcess = async (path: string) => {
 
     const xmlData = await response.text()
 
+    const process = parseProcess(xmlData)
+
+    return process
+}
+
+export const parseProcess = (xmlData: string) => {
+
     const jsonData = xml2json(xmlData)
 
     const processData = JSON.parse(jsonData)
