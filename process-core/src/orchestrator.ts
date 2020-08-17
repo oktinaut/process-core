@@ -23,11 +23,6 @@ export type TaskRequest = {
     token?: Token
 }
 
-// type EventHookTask = (event: "task", listener: (task: TaskRequest | undefined) => void) => void
-// type EventHookEnd = (event: "end", listener: (eventName: String) => void) => void
-
-// type EventHook = EventHookTask | EventHookEnd
-
 export type Orchestrator = {
 
     start: (event?: string) => void
@@ -37,11 +32,6 @@ export type Orchestrator = {
     addEventListener: <T>(event: string, listener: (detail: T) => void) => void
 
     removeEventListener: <T>(event: string, listener: (detail: T) => void) => void
-
-    // addEventListener: (event: "task", listener: (task: TaskRequest | undefined) => void) => void
-
-    // removeEventListener: (event: "task", listener: (task: TaskRequest | undefined) => void) => void
-
 }
 
 export const createOrchestrator = (process: Process) => {
