@@ -3,7 +3,7 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin")
 const FixDefaultImportPlugin = require("webpack-fix-default-import-plugin")
 
 module.exports = {
-    mode: "development",
+    mode: "production",
     devtool: "source-map",
     entry: "./src/index.ts",
     output: {
