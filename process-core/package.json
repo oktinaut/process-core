@@ -10,8 +10,8 @@
     "bundle": "webpack && cp dist/index.js ../ProcessKit/ProcessKit/Resources/process-core.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Tim Okolowski <tim@okolowski.com>",
+  "license": "MIT",
   "dependencies": {
     "eventemitter3": "^4.0.4",
     "xml-js": "^1.6.11"
