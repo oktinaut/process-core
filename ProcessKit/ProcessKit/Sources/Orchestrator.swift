@@ -39,7 +39,9 @@ public class Orchestrator : ObservableObject {
         let bundle = Bundle(for: type(of: self))
         
         guard
-            let scriptURL = bundle.url(forResource: "process-core", withExtension: "js"),
+            let resourceBundleURL = bundle.url(forResource: "ProcessKit", withExtension: "bundle"),
+            let resourceBundle = Bundle(url: resourceBundleURL),
+            let scriptURL = resourceBundle.url(forResource: "process-core", withExtension: "js"),
             let script = try? String(contentsOf: scriptURL),
             let processData = try? String(contentsOf: processURL) else {
                 

@@ -33,6 +33,7 @@ public struct Token {
         
         if
             let jsError = value.objectForKeyedSubscript("error"),
+            jsError.isUndefined == false,
             let errorMessage = jsError.objectForKeyedSubscript("message")?.toString() {
             
             let error = ProcessError(message: errorMessage)
