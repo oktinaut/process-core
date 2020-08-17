@@ -1,0 +1,16 @@
+PODS:
+  - ProcessKit (0.0.1)
+
+DEPENDENCIES:
+  - ProcessKit (from `../ProcessKit.podspec`)
+
+EXTERNAL SOURCES:
+  ProcessKit:
+    :path: "../ProcessKit.podspec"
+
+SPEC CHECKSUMS:
+  ProcessKit: b29e37f69398693be620593f7d7a4203e384fde7
+
+PODFILE CHECKSUM: 28b213debc0775e0e87ffc89ef1cb5a2a6c9f0a2
+
+COCOAPODS: 1.9.1

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_0nasxdk" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.1.1">
+  <bpmn:collaboration id="Collaboration_0mvk12p">
+    <bpmn:participant id="Participant_017stu9" processRef="Process_0rxippl" />
+  </bpmn:collaboration>
+  <bpmn:process id="Process_0rxippl" isExecutable="true">
+    <bpmn:startEvent id="default">
+      <bpmn:outgoing>Flow_0dehl5m</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_0dehl5m" sourceRef="default" targetRef="set-initial-counter" />
+    <bpmn:sequenceFlow id="Flow_1wzd3o5" sourceRef="set-initial-counter" targetRef="validate-counter" />
+    <bpmn:userTask id="set-initial-counter" name="Set Initial Counter Value">
+      <bpmn:incoming>Flow_0dehl5m</bpmn:incoming>
+      <bpmn:outgoing>Flow_1wzd3o5</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="join">
+      <bpmn:incoming>Flow_1puqj53</bpmn:incoming>
+      <bpmn:incoming>Flow_19x16z4</bpmn:incoming>
+      <bpmn:outgoing>Flow_0k7ct4y</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="check-counter" default="Flow_19x16z4">
+      <bpmn:incoming>Flow_1vhrwgd</bpmn:incoming>
+      <bpmn:outgoing>Flow_19x16z4</bpmn:outgoing>
+      <bpmn:outgoing>Flow_03f3bc4</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="end-success">
+      <bpmn:incoming>Flow_1hjqqzh</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="validate-counter" name="Validate Counter">
+      <bpmn:incoming>Flow_1wzd3o5</bpmn:incoming>
+      <bpmn:outgoing>Flow_1puqj53</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="display-results" name="Display Results">
+      <bpmn:incoming>Flow_03f3bc4</bpmn:incoming>
+      <bpmn:outgoing>Flow_1hjqqzh</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="end-error">
+      <bpmn:incoming>Flow_0qcurss</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="display-error" name="Display Error">
+      <bpmn:incoming>Flow_05b5eou</bpmn:incoming>
+      <bpmn:outgoing>Flow_0qcurss</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:boundaryEvent id="Event_0f67g7t" attachedToRef="validate-counter">
+      <bpmn:outgoing>Flow_05b5eou</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_1m9miks" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="Flow_1puqj53" sourceRef="validate-counter" targetRef="join" />
+    <bpmn:sequenceFlow id="Flow_19x16z4" sourceRef="check-counter" targetRef="join" />
+    <bpmn:sequenceFlow id="Flow_0k7ct4y" sourceRef="join" targetRef="display-counter" />
+    <bpmn:sequenceFlow id="Flow_1vhrwgd" sourceRef="decrement-counter" targetRef="check-counter" />
+    <bpmn:sequenceFlow id="Flow_1vp1qug" sourceRef="display-counter" targetRef="decrement-counter" />
+    <bpmn:sequenceFlow id="Flow_03f3bc4" name="Counter is 0" sourceRef="check-counter" targetRef="display-results">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" language="js">return payload.counter &lt;= 0</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1hjqqzh" sourceRef="display-results" targetRef="end-success" />
+    <bpmn:sequenceFlow id="Flow_0qcurss" sourceRef="display-error" targetRef="end-error" />
+    <bpmn:sequenceFlow id="Flow_05b5eou" sourceRef="Event_0f67g7t" targetRef="display-error" />
+    <bpmn:userTask id="display-counter" name="Display Counter">
+      <bpmn:incoming>Flow_0k7ct4y</bpmn:incoming>
+      <bpmn:outgoing>Flow_1vp1qug</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:scriptTask id="decrement-counter" name="Decrement Counter" scriptFormat="js">
+      <bpmn:incoming>Flow_1vp1qug</bpmn:incoming>
+      <bpmn:outgoing>Flow_1vhrwgd</bpmn:outgoing>
+      <bpmn:script>return { counter: payload.counter - 1 }</bpmn:script>
+    </bpmn:scriptTask>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_0mvk12p">
+      <bpmndi:BPMNShape id="Participant_017stu9_di" bpmnElement="Participant_017stu9" isHorizontal="true">
+        <dc:Bounds x="129" y="100" width="1441" height="350" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0dehl5m_di" bpmnElement="Flow_0dehl5m">
+        <di:waypoint x="215" y="160" />
+        <di:waypoint x="300" y="160" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1wzd3o5_di" bpmnElement="Flow_1wzd3o5">
+        <di:waypoint x="400" y="160" />
+        <di:waypoint x="490" y="160" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1puqj53_di" bpmnElement="Flow_1puqj53">
+        <di:waypoint x="590" y="160" />
+        <di:waypoint x="678" y="160" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_19x16z4_di" bpmnElement="Flow_19x16z4">
+        <di:waypoint x="1217" y="185" />
+        <di:waypoint x="1217" y="273" />
+        <di:waypoint x="703" y="273" />
+        <di:waypoint x="703" y="185" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0k7ct4y_di" bpmnElement="Flow_0k7ct4y">
+        <di:waypoint x="728" y="160" />
+        <di:waypoint x="810" y="160" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1vhrwgd_di" bpmnElement="Flow_1vhrwgd">
+        <di:waypoint x="1100" y="160" />
+        <di:waypoint x="1192" y="160" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1vp1qug_di" bpmnElement="Flow_1vp1qug">
+        <di:waypoint x="910" y="160" />
+        <di:waypoint x="1000" y="160" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_03f3bc4_di" bpmnElement="Flow_03f3bc4">
+        <di:waypoint x="1242" y="160" />
+        <di:waypoint x="1331" y="160" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1252" y="142" width="60" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1hjqqzh_di" bpmnElement="Flow_1hjqqzh">
+        <di:waypoint x="1431" y="160" />
+        <di:waypoint x="1514" y="160" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0qcurss_di" bpmnElement="Flow_0qcurss">
+        <di:waypoint x="1431" y="383" />
+        <di:waypoint x="1514" y="383" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_05b5eou_di" bpmnElement="Flow_05b5eou">
+        <di:waypoint x="522" y="218" />
+        <di:waypoint x="522" y="383" />
+        <di:waypoint x="1331" y="383" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="default">
+        <dc:Bounds x="179" y="142" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_00w50et_di" bpmnElement="set-initial-counter">
+        <dc:Bounds x="300" y="120" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0r633w6_di" bpmnElement="join" isMarkerVisible="true">
+        <dc:Bounds x="678" y="135" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0xzhdyo_di" bpmnElement="check-counter" isMarkerVisible="true">
+        <dc:Bounds x="1192" y="135" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1jw2e5k_di" bpmnElement="end-success">
+        <dc:Bounds x="1514" y="142" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_05i4pe1_di" bpmnElement="validate-counter">
+        <dc:Bounds x="490" y="120" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1khdwyo_di" bpmnElement="display-results">
+        <dc:Bounds x="1331" y="120" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_09bqhzg_di" bpmnElement="end-error">
+        <dc:Bounds x="1514" y="365" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_17tx494_di" bpmnElement="display-error">
+        <dc:Bounds x="1331" y="343" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0dcladm_di" bpmnElement="display-counter">
+        <dc:Bounds x="810" y="120" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_03vpbl2_di" bpmnElement="decrement-counter">
+        <dc:Bounds x="1000" y="120" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0v1648b_di" bpmnElement="Event_0f67g7t">
+        <dc:Bounds x="504" y="182" width="36" height="36" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

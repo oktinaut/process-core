@@ -1,13 +1,13 @@
 {
   "name": "process-core",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {
-    "postinstall": "npm run build",
+    "prepublish": "npm run build",
     "build": "tsc",
-    "bundle": "webpack",
+    "bundle": "webpack && cp dist/index.js ../ProcessKit/ProcessKit/Resources/process-core.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
