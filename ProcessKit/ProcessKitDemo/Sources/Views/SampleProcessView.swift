@@ -14,19 +14,16 @@ struct SampleProcessView : View {
     @Environment(\.presentationMode)
     private var presentationMode: Binding<PresentationMode>
     
-    private var processURL: URL
-    
-    init() {
-        self.processURL = Bundle.main.url(forResource: "sample", withExtension: "bpmn")!
-    }
+    @State
+    private var viewModel = ProcessViewModel(
+        processURL: Bundle.main.url(forResource: "sample", withExtension: "bpmn")!,
+        startEvent: "default",
+        serviceRegistry: serviceRegistry
+    )
     
     var body: some View {
         ProcessView(
-            viewModel: ProcessViewModel(
-                processURL: self.processURL,
-                startEvent: "default",
-                serviceRegistry: serviceRegistry
-            ),
+            viewModel: self.viewModel,
             viewRegistry: viewRegistry
         )
             .onEnd { _ in

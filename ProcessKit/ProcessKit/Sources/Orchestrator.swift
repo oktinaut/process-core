@@ -75,6 +75,10 @@ public class Orchestrator : ObservableObject {
             
             self.task = task
             
+            #if DEBUG
+            print("[Orchestrator] current Task -> \(task?.id ?? "")")
+            #endif
+            
             if
                 let currentTask = task,
                 currentTask.type == "service",

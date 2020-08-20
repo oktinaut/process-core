@@ -12,9 +12,9 @@ import SwiftUI
 public struct ProcessView : View {
     
 //    @ObservedObject
-//    private var orchestrator: Orchestrator
+//    var orchestrator: Orchestrator
     
-    private var viewRegistry: ViewRegistry
+    var viewRegistry: ViewRegistry
     
 //    public init(processURL: URL,
 //                startEvent: String? = nil,
@@ -31,25 +31,29 @@ public struct ProcessView : View {
     
     @ObservedObject
     private var viewModel: ProcessViewModel
-    
+
     public init(viewModel: ProcessViewModel, viewRegistry: ViewRegistry) {
-        
+
         self.viewModel = viewModel
-        
+
         self.viewRegistry = viewRegistry
+    }
+    
+    public var orchestrator: Orchestrator {
+        self.viewModel.orchestrator
     }
     
     public var body: some View {
         Group {
             self.renderUserTask()
         }
-        .environmentObject(self.viewModel.orchestrator)
+        .environmentObject(self.orchestrator)
     }
     
     func renderUserTask() -> AnyView {
         
         guard
-            let task = self.viewModel.orchestrator.task,
+            let task = self.orchestrator.task,
             let viewFactory = self.viewRegistry[task.id] else {
             
             return AnyView(VStack {
@@ -65,7 +69,7 @@ extension ProcessView {
     
     public func onEnd(_ onEndHandler: @escaping (String) -> Void) -> some View {
         
-        self.viewModel.orchestrator.onEnd = onEndHandler
+        self.orchestrator.onEnd = onEndHandler
         
         return self
     }

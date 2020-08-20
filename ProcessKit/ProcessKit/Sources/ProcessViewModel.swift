@@ -6,12 +6,14 @@
 //  Copyright © 2020 Huf Secure Mobile GmbH. All rights reserved.
 //
 
-import Foundation
+import Combine
 
 public class ProcessViewModel : ObservableObject, Identifiable {
     
     @Published
     var orchestrator: Orchestrator
+    
+    private var cancellable: AnyCancellable?
     
     public init(processURL: URL,
                 startEvent: String? = nil,
@@ -22,5 +24,9 @@ public class ProcessViewModel : ObservableObject, Identifiable {
                                          serviceRegistry: serviceRegistry)
         
         self.orchestrator.start(event: startEvent)
+        
+        self.cancellable = self.orchestrator.$task.sink { _ in
+            self.objectWillChange.send()
+        }
     }
 }
