@@ -11,35 +11,45 @@ import SwiftUI
 
 public struct ProcessView : View {
     
-    @ObservedObject
-    private var orchestrator: Orchestrator
+//    @ObservedObject
+//    private var orchestrator: Orchestrator
     
     private var viewRegistry: ViewRegistry
     
-    public init(processURL: URL,
-                startEvent: String? = nil,
-                serviceRegistry: ServiceRegistry,
-                viewRegistry: ViewRegistry) {
+//    public init(processURL: URL,
+//                startEvent: String? = nil,
+//                serviceRegistry: ServiceRegistry,
+//                viewRegistry: ViewRegistry) {
+//
+//        self.orchestrator = Orchestrator(processURL: processURL,
+//                                         serviceRegistry: serviceRegistry)
+//
+//        self.viewRegistry = viewRegistry
+//
+//        self.orchestrator.start(event: startEvent)
+//    }
+    
+    @ObservedObject
+    private var viewModel: ProcessViewModel
+    
+    public init(viewModel: ProcessViewModel, viewRegistry: ViewRegistry) {
         
-        self.orchestrator = Orchestrator(processURL: processURL,
-                                         serviceRegistry: serviceRegistry)
+        self.viewModel = viewModel
         
         self.viewRegistry = viewRegistry
-        
-        self.orchestrator.start(event: startEvent)
     }
     
     public var body: some View {
         Group {
             self.renderUserTask()
         }
-        .environmentObject(self.orchestrator)
+        .environmentObject(self.viewModel.orchestrator)
     }
     
     func renderUserTask() -> AnyView {
         
         guard
-            let task = self.orchestrator.task,
+            let task = self.viewModel.orchestrator.task,
             let viewFactory = self.viewRegistry[task.id] else {
             
             return AnyView(VStack {
@@ -55,7 +65,7 @@ extension ProcessView {
     
     public func onEnd(_ onEndHandler: @escaping (String) -> Void) -> some View {
         
-        self.orchestrator.onEnd = onEndHandler
+        self.viewModel.orchestrator.onEnd = onEndHandler
         
         return self
     }

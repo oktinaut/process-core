@@ -15,6 +15,7 @@
 		07D5A65824E56DD600CA7E8F /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 07D5A65724E56DD600CA7E8F /* Preview Assets.xcassets */; };
 		07D5A65B24E56DD600CA7E8F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 07D5A65924E56DD600CA7E8F /* LaunchScreen.storyboard */; };
 		07D5A66A24E570AC00CA7E8F /* sample.bpmn in Resources */ = {isa = PBXBuildFile; fileRef = 07D5A66824E570AC00CA7E8F /* sample.bpmn */; };
+		07DBF83B24EE6B3200920C0A /* ProcessViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07DBF83A24EE6B3200920C0A /* ProcessViewModel.swift */; };
 		07F16E5524E68AFD0039C00E /* DisplayCounterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F16E5424E68AFD0039C00E /* DisplayCounterView.swift */; };
 		07F16E5724E68C180039C00E /* DisplayResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F16E5624E68C180039C00E /* DisplayResultsView.swift */; };
 		07F16E6324E690BC0039C00E /* ProcessKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 07F16E6124E690BC0039C00E /* ProcessKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -50,6 +51,7 @@
 		07D5A65C24E56DD600CA7E8F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		07D5A66624E56EA200CA7E8F /* Orchestrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Orchestrator.swift; sourceTree = "<group>"; };
 		07D5A66824E570AC00CA7E8F /* sample.bpmn */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = sample.bpmn; sourceTree = "<group>"; };
+		07DBF83A24EE6B3200920C0A /* ProcessViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessViewModel.swift; sourceTree = "<group>"; };
 		07F16E4F24E674820039C00E /* ServiceRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceRegistry.swift; sourceTree = "<group>"; };
 		07F16E5124E682910039C00E /* ProcessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessView.swift; sourceTree = "<group>"; };
 		07F16E5424E68AFD0039C00E /* DisplayCounterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayCounterView.swift; sourceTree = "<group>"; };
@@ -179,12 +181,13 @@
 			isa = PBXGroup;
 			children = (
 				07D5A66624E56EA200CA7E8F /* Orchestrator.swift */,
-				07F16E5124E682910039C00E /* ProcessView.swift */,
 				07F16E4F24E674820039C00E /* ServiceRegistry.swift */,
 				07F16E7724E693E40039C00E /* TaskRequest.swift */,
 				07F16E7524E693D80039C00E /* Token.swift */,
 				07F16E5824E68D420039C00E /* ViewRegistry.swift */,
 				07F16E8224E6DFE80039C00E /* ProcessError.swift */,
+				07F16E5124E682910039C00E /* ProcessView.swift */,
+				07DBF83A24EE6B3200920C0A /* ProcessViewModel.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -462,6 +465,7 @@
 				07F16E8324E6DFE80039C00E /* ProcessError.swift in Sources */,
 				07F16E7624E693D80039C00E /* Token.swift in Sources */,
 				07F16E7824E693E40039C00E /* TaskRequest.swift in Sources */,
+				07DBF83B24EE6B3200920C0A /* ProcessViewModel.swift in Sources */,
 				07F16E7124E693980039C00E /* ViewRegistry.swift in Sources */,
 				07F16E6F24E693980039C00E /* ProcessView.swift in Sources */,
 				07F16E6E24E693930039C00E /* Orchestrator.swift in Sources */,

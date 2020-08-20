@@ -21,10 +21,14 @@ struct SampleProcessView : View {
     }
     
     var body: some View {
-        ProcessView(processURL: self.processURL,
-                    startEvent: "default",
-                    serviceRegistry: serviceRegistry,
-                    viewRegistry: viewRegistry)
+        ProcessView(
+            viewModel: ProcessViewModel(
+                processURL: self.processURL,
+                startEvent: "default",
+                serviceRegistry: serviceRegistry
+            ),
+            viewRegistry: viewRegistry
+        )
             .onEnd { _ in
                 self.presentationMode.wrappedValue.dismiss()
             }
