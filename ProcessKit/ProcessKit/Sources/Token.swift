@@ -16,9 +16,11 @@ public struct Token {
     
     public func update(payload: [AnyHashable : Any]) -> Token {
         
-        let mutatedToken = Token(id: self.id, payload: payload)
+        let updatedPayload = self.payload.merge(payload)
         
-        return mutatedToken
+        let updatedToken = Token(id: self.id, payload: updatedPayload)
+        
+        return updatedToken
     }
     
     static func fromJS(value: JSValue) -> Token? {
@@ -53,5 +55,23 @@ public struct Token {
         ], in: context)
         
         return value
+    }
+}
+
+extension Dictionary {
+    
+    func merge(_ dict: [Key : Value]) -> Dictionary {
+        
+        var merged: [Key : Value] = [:]
+        
+        for (key, value) in self {
+            merged[key] = value
+        }
+        
+        for (key, value) in dict {
+            merged[key] = value
+        }
+        
+        return merged
     }
 }
