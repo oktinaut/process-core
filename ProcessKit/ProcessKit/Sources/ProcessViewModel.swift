@@ -26,7 +26,9 @@ public class ProcessViewModel : ObservableObject, Identifiable {
         self.orchestrator.start(event: startEvent)
         
         self.cancellable = self.orchestrator.$task.sink { _ in
-            self.objectWillChange.send()
+            DispatchQueue.main.async {
+                self.objectWillChange.send()
+            }
         }
     }
 }
