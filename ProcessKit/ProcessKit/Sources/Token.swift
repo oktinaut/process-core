@@ -57,6 +57,7 @@ public struct Token {
     func toJS(context: JSContext) -> JSValue? {
         
         let value = JSValue(object: [
+            "instanceId": self.instanceId,
             "id": self.id,
             "payload": self.payload
         ], in: context)

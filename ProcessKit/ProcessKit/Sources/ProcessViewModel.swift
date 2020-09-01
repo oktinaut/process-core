@@ -18,7 +18,7 @@ public class ProcessViewModel : ObservableObject, Identifiable {
     public init(processURL: URL,
                 startEvent: String? = nil,
                 serviceRegistry: ServiceRegistry,
-                onTaskEntered: ((TaskRequest) -> ())? = nil
+                onTaskEntered: @escaping (TaskRequest) -> () = { _ in }
     ) {
         
         self.orchestrator = Orchestrator(processURL: processURL,
@@ -29,7 +29,7 @@ public class ProcessViewModel : ObservableObject, Identifiable {
         self.cancellable = self.orchestrator.$task.sink { task in
             
             if let task = task {
-                onTaskEntered?(task)
+                onTaskEntered(task)
             }
             
             DispatchQueue.main.async {
