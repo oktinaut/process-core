@@ -17,7 +17,8 @@ public class ProcessViewModel : ObservableObject, Identifiable {
     
     public init(processURL: URL,
                 startEvent: String? = nil,
-                serviceRegistry: ServiceRegistry
+                serviceRegistry: ServiceRegistry,
+                onTaskEntered: ((TaskRequest) -> ())? = nil
     ) {
         
         self.orchestrator = Orchestrator(processURL: processURL,
@@ -25,7 +26,12 @@ public class ProcessViewModel : ObservableObject, Identifiable {
         
         self.orchestrator.start(event: startEvent)
         
-        self.cancellable = self.orchestrator.$task.sink { _ in
+        self.cancellable = self.orchestrator.$task.sink { task in
+            
+            if let task = task {
+                onTaskEntered?(task)
+            }
+            
             DispatchQueue.main.async {
                 self.objectWillChange.send()
             }

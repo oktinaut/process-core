@@ -6,6 +6,7 @@ import { Process, ProcessNode, NodeWithNext, StartEvent, ScriptTask } from "./pr
 
 export type Token = {
     payload: Record<string, any>
+    instanceId: string
     id: string
     error?: Error
 }
@@ -193,6 +194,7 @@ export const createOrchestrator = (process: Process) => {
             }
 
             const initialToken: Token = {
+                instanceId: createID(),
                 id: createID(),
                 payload: {},
             }
