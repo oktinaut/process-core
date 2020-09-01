@@ -15,6 +15,8 @@ export const updatePayload = (token: Token, payload: Record<string, any>): Token
 
     const nextToken = Object.assign({}, token, { payload })
 
+    console.log("[Orchestrator] Update token", nextToken)
+
     return nextToken
 }
 
