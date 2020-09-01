@@ -10,6 +10,7 @@ import JavaScriptCore
 
 public struct Token {
     
+    public var instanceId: String
     public var id: String
     public var payload: [AnyHashable : Any]
     public var error: ProcessError?
@@ -18,7 +19,7 @@ public struct Token {
         
         let updatedPayload = self.payload.merge(payload)
         
-        let updatedToken = Token(id: self.id, payload: updatedPayload)
+        let updatedToken = Token(instanceId: self.instanceId, id: self.id, payload: updatedPayload)
         
         return updatedToken
     }
@@ -27,7 +28,8 @@ public struct Token {
 
         guard
             let dict = value.toDictionary(),
-            let key = dict["id"] as? String,
+            let instanceId = dict["instanceId"] as? String,
+            let id = dict["id"] as? String,
             let payload = dict["payload"] as? [AnyHashable : Any] else {
               
             return nil
@@ -40,10 +42,15 @@ public struct Token {
             
             let error = ProcessError(message: errorMessage)
 
-            return Token(id: key, payload: payload, error: error)
+            return Token(instanceId: instanceId,
+                         id: id,
+                         payload: payload,
+                         error: error)
             
         } else {
-            return Token(id: key, payload: payload)
+            return Token(instanceId: instanceId,
+                         id: id,
+                         payload: payload)
         }
     }
     
