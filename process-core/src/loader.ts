@@ -44,7 +44,7 @@ export const parseProcess = (xmlData: string) => {
         ) as SequenceFlow
 
         return sequenceFlow.attributes.targetRef
-    } 
+    }
 
     const findMultipleNext = (source: Element) => {
 
@@ -53,7 +53,7 @@ export const parseProcess = (xmlData: string) => {
         const nextNodes = outgoing.map(edge => {
 
             const flowId = edge.elements?.[0].text
-            
+
             const sequenceFlow = nodeDefs.find(
                 elem => elem.name === "bpmn:sequenceFlow" && elem.attributes?.id === flowId
             ) as Element & SequenceFlow
@@ -76,8 +76,8 @@ export const parseProcess = (xmlData: string) => {
 
     const findErrorBoundaryNext = (source: Element) => {
 
-        const errorBoundary = nodeDefs.find(elem => 
-            elem.name === "bpmn:boundaryEvent" && 
+        const errorBoundary = nodeDefs.find(elem =>
+            elem.name === "bpmn:boundaryEvent" &&
             elem.attributes?.attachedToRef === source.attributes?.id &&
             elem.elements?.find(elem => elem.name === "bpmn:errorEventDefinition")
         )
@@ -98,7 +98,7 @@ export const parseProcess = (xmlData: string) => {
         .map((elem: Element) => {
 
             const id = elem.attributes?.id as string
-            
+
             const startEvent: StartEvent = {
                 type: "start",
                 id: id,
@@ -113,7 +113,7 @@ export const parseProcess = (xmlData: string) => {
         .map((elem: Element) => {
 
             const id = elem.attributes?.id as string
-            
+
             const endEvent: EndEvent = {
                 type: "end",
                 id: id,
@@ -127,7 +127,7 @@ export const parseProcess = (xmlData: string) => {
         .map((elem: Element) => {
 
             const id = elem.attributes?.id as string
-            
+
             const serviceTask: ServiceTask = {
                 type: "service",
                 id: id,
@@ -143,7 +143,7 @@ export const parseProcess = (xmlData: string) => {
         .map((elem: Element) => {
 
             const id = elem.attributes?.id as string
-            
+
             const userTask: UserTask = {
                 type: "user",
                 id: id,
@@ -155,14 +155,14 @@ export const parseProcess = (xmlData: string) => {
         })
 
     const splitGateways = nodeDefs
-        .filter((elem: Element) => 
-            elem.name === "bpmn:exclusiveGateway" && 
+        .filter((elem: Element) =>
+            elem.name === "bpmn:exclusiveGateway" &&
             (elem.elements?.filter(edge => edge.name === "bpmn:outgoing")?.length ?? 0) > 1
         )
         .map((elem: Element) => {
 
             const id = elem.attributes?.id as string
-            
+
             const splitGateway: SplitGateway = {
                 type: "split",
                 id: id,
@@ -173,14 +173,14 @@ export const parseProcess = (xmlData: string) => {
         })
 
     const joinGateways = nodeDefs
-        .filter((elem: Element) => 
-            elem.name === "bpmn:exclusiveGateway" && 
+        .filter((elem: Element) =>
+            elem.name === "bpmn:exclusiveGateway" &&
             (elem.elements?.filter(edge => edge.name === "bpmn:outgoing")?.length ?? 0) == 1
         )
         .map((elem: Element) => {
 
             const id = elem.attributes?.id as string
-            
+
             const joinGateway: JoinGateway = {
                 type: "join",
                 id: id,
@@ -212,11 +212,9 @@ export const parseProcess = (xmlData: string) => {
             return scriptTask
         })
 
-    console.log(nodeDefs)
-
     const process: Process = {
         nodes: [
-            ...startEvents, 
+            ...startEvents,
             ...endEvents,
             ...serviceTasks,
             ...userTasks,
@@ -225,8 +223,6 @@ export const parseProcess = (xmlData: string) => {
             ...scriptTasks,
         ]
     }
-
-    console.log(process)
 
     return process
 }

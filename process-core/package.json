@@ -8,21 +8,26 @@
     "prepublish": "npm run build",
     "build": "tsc",
     "bundle": "webpack && cp dist/index.js ../ProcessKit/ProcessKit/Resources/process-core.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npm run build && jest"
   },
   "author": "Tim Okolowski <tim@okolowski.com>",
   "license": "MIT",
   "dependencies": {
-    "eventemitter3": "^4.0.4",
-    "rxjs": "^6.6.2",
+    "eventemitter3": "^4.0.7",
+    "rxjs": "^6.6.3",
     "xml-js": "^1.6.11"
   },
   "devDependencies": {
-    "@types/uuid": "^8.0.1",
+    "@types/jest": "^26.0.14",
+    "@types/node": "^14.11.8",
+    "@types/node-fetch": "^2.5.7",
+    "@types/uuid": "^8.3.0",
     "clean-webpack-plugin": "^3.0.0",
-    "ts-loader": "^8.0.2",
-    "typescript": "^3.9.7",
-    "webpack": "^4.44.1",
+    "jest": "^26.5.2",
+    "ts-jest": "^26.4.1",
+    "ts-loader": "^8.0.4",
+    "typescript": "^4.0.3",
+    "webpack": "^4.44.2",
     "webpack-cli": "^3.3.12",
     "webpack-fix-default-import-plugin": "^1.0.3"
   }
