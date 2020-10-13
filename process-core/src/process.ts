@@ -29,12 +29,14 @@ export type ServiceTask = CommonNode & {
     type: "service"
     next: string
     errorNext?: string
+    timer?: { next: string, duration: number }
 }
 
 export type UserTask = CommonNode & {
     type: "user"
     next: string
     errorNext?: string
+    timer?: { next: string, duration: number }
 }
 
 export type ScriptTask = CommonNode & {
@@ -42,6 +44,7 @@ export type ScriptTask = CommonNode & {
     script: string
     next: string
     errorNext?: string
+    timer?: { next: string, duration: number }
 }
 
 export type EndEvent = CommonNode & {

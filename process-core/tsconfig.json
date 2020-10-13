@@ -6,7 +6,8 @@
         "outDir": "build",
         "declaration": true,
         "declarationDir": "build",
-        "strict": true
+        "strict": true,
+        "incremental": true
     },
     "include": [
         "src/**/*.ts"

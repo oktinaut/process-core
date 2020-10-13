@@ -1,5 +1,5 @@
 import { filter } from "rxjs/operators"
-import { Orchestrator, Payload } from "./NextOrchestrator"
+import { Orchestrator, Payload } from "./Orchestrator"
 
 type ServiceTask = (payload: Payload) => Promise<Payload>
 
@@ -21,14 +21,18 @@ export const createServiceTaskRunner = (orchestrator: Orchestrator, serviceTasks
 
             const result = await serviceTask(job.payload)
 
-            orchestrator.resolveJob(job.id, { payload: result })
+            try {
+                orchestrator.resolveJob(job.id, { payload: result })
+            } catch (error) { }
 
         } catch (error) {
 
             const code = error?.code
             const message = error?.message
 
-            orchestrator.rejectJob(job.id, { code, message })
+            try {
+                orchestrator.rejectJob(job.id, { code, message })
+            } catch (error) { }
         }
     })
 

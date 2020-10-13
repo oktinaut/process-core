@@ -1,20 +1,9 @@
 import { xml2json, Element } from "xml-js"
 
-import { StartEvent, EndEvent, Process, ServiceTask, UserTask, SplitGateway, JoinGateway, ScriptTask } from "./process"
+import { StartEvent, EndEvent, Process, ServiceTask, UserTask, SplitGateway, JoinGateway, ScriptTask } from "./Process"
 
 type SequenceFlow = {
     attributes: { sourceRef: string, targetRef: string }
-}
-
-export const loadProcess = async (path: string) => {
-
-    const response = await fetch(path)
-
-    const xmlData = await response.text()
-
-    const process = parseProcess(xmlData)
-
-    return process
 }
 
 export const parseProcess = (xmlData: string) => {
@@ -93,6 +82,45 @@ export const parseProcess = (xmlData: string) => {
         return sequenceFlow?.attributes?.targetRef
     }
 
+    const findTimerBoundary = (source: Element) => {
+
+        const timerBoundary = nodeDefs.find(elem =>
+            elem.name === "bpmn:boundaryEvent" &&
+            elem.attributes?.attachedToRef === source.attributes?.id &&
+            elem.elements?.find(elem => elem.name === "bpmn:timerEventDefinition")
+        )
+
+        if (!timerBoundary) {
+            return undefined
+        }
+
+        const outgoing = timerBoundary.elements
+            ?.find(elem => elem.name === "bpmn:outgoing")
+
+        const flowId = outgoing?.elements?.[0].text
+
+        const durationDefinition = timerBoundary?.elements
+            ?.find(elem => elem.name === "bpmn:timerEventDefinition")
+            ?.elements
+            ?.find(elem => elem.name === "bpmn:timeDuration")
+            ?.elements?.[0]
+            ?.text
+            ?.toString() ?? "0"
+
+        const duration = parseInt(durationDefinition)
+
+        const sequenceFlow = nodeDefs.find(
+            elem => elem.name === "bpmn:sequenceFlow" && elem.attributes?.id === flowId
+        ) as SequenceFlow
+
+        const next = sequenceFlow?.attributes?.targetRef
+
+        return {
+            next,
+            duration,
+        }
+    }
+
     const startEvents = nodeDefs
         .filter((elem: Element) => elem.name === "bpmn:startEvent")
         .map((elem: Element) => {
@@ -133,6 +161,7 @@ export const parseProcess = (xmlData: string) => {
                 id: id,
                 next: findNext(elem),
                 errorNext: findErrorBoundaryNext(elem),
+                timer: findTimerBoundary(elem),
             }
 
             return serviceTask
@@ -149,6 +178,7 @@ export const parseProcess = (xmlData: string) => {
                 id: id,
                 next: findNext(elem),
                 errorNext: findErrorBoundaryNext(elem),
+                timer: findTimerBoundary(elem),
             }
 
             return userTask
@@ -207,6 +237,7 @@ export const parseProcess = (xmlData: string) => {
                 script,
                 next: findNext(elem),
                 errorNext: findErrorBoundaryNext(elem),
+                timer: findTimerBoundary(elem),
             }
 
             return scriptTask

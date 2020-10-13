@@ -1,13 +1,15 @@
 
 const sandboxProxies = new WeakMap()
 
-export const compileCode = (source: string) => {
+export const compileScript = (script: string) => {
 
-    const sandboxedSource = `with (sandbox) { ${source} }`
+    const sandboxedSource = `with (sandbox) { ${script} }`
 
     const code = new Function('sandbox', sandboxedSource)
 
-    return (sandbox: Record<string, any>) => {
+    const runScript = (sandbox: Record<string, any>) => {
+
+        sandbox["Promise"] = Promise
 
         if (!sandboxProxies.has(sandbox)) {
 
@@ -18,6 +20,8 @@ export const compileCode = (source: string) => {
 
         return code(sandboxProxies.get(sandbox))
     }
+
+    return runScript
 }
 
 const has = () => {

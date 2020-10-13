@@ -1,7 +1,7 @@
-import { start } from "repl"
 import { Observable, Subject } from "rxjs"
-import { createID } from "./id"
-import { Process, StartEvent } from "./process"
+import { createID } from "./ID"
+import { Process, StartEvent } from "./Process"
+import { compileScript } from "./ScriptCompiler"
 
 type JobType
     = "user"
@@ -92,7 +92,7 @@ export type Orchestrator = {
     rejectJob: (jobId: string, options?: RejectJobOptions) => void
 }
 
-export const createOrchestrator = (process: Process): Orchestrator => {
+export const createOrchestrator = (process: Process, { serviceTaskTimeout = 0 } = {}): Orchestrator => {
 
     let activeJobs: Job[] = []
     let processCompletions: Record<string, ProcessCompletion> = {}
@@ -101,7 +101,7 @@ export const createOrchestrator = (process: Process): Orchestrator => {
 
     const jobs = jobsSubject.asObservable()
 
-    const startNextJob = (correlationId: string, nodeId: string, payload: Payload, error?: { code: string, message: string }) => {
+    const startNextJob = async (correlationId: string, nodeId: string, payload: Payload, error?: { code: string, message: string }) => {
 
         const node = getNode(nodeId)
 
@@ -112,6 +112,42 @@ export const createOrchestrator = (process: Process): Orchestrator => {
             const completion = processCompletions[correlationId]
 
             completion.resolve(payload)
+
+            return
+        }
+
+        if (node.type === "split") {
+
+            let nextNodeId = node.next
+                .filter(next => next.condition.length > 0)
+                .find(next => {
+
+                    const runScript = compileScript(next.condition)
+
+                    return runScript({ payload })
+                })
+                ?.id ?? node.next
+                .find(next => next.condition.length === 0)
+                ?.id
+
+            if (!nextNodeId) {
+
+                const completion = processCompletions[correlationId]
+
+                completion.reject({ 
+                    code: "", 
+                    message: `No matching edge found at exclusive gateway ${node.id}`, 
+                })
+
+                return
+            }
+
+            startNextJob(correlationId, nextNodeId, payload)
+        }
+
+        if (node.type === "join") {
+            
+            startNextJob(correlationId, node.next, payload)
 
             return
         }
@@ -129,7 +165,58 @@ export const createOrchestrator = (process: Process): Orchestrator => {
 
             activeJobs = activeJobs.concat([job])
 
-            jobsSubject.next(job)
+            const timerDuration = node.timer?.duration ?? (node.type !== "user" ? serviceTaskTimeout : 0);
+
+            if (timerDuration > 0) {
+                setTimeout(() => {
+
+                    const timer = node.timer
+
+                    if (timer === undefined) {
+
+                        const completion = processCompletions[correlationId]
+
+                        completion.reject({ code: "", message: "timed out" })
+
+                        return
+                    }
+
+                    activeJobs = activeJobs.filter(job => job.id !== jobId)
+
+                    startNextJob(correlationId, node.timer!.next, payload, { code: "", message: "timed out" })
+
+                }, timerDuration)
+            }
+
+            if (node.type === "script") {
+
+                const runScript = compileScript(node.script)
+    
+                try {
+    
+                    const result = runScript({ payload, error })
+
+                    let updatedPayload
+
+                    if (result instanceof Promise) {
+                        updatedPayload = await result
+                    } else {
+                        updatedPayload = result
+                    }
+
+                    resolveJob(jobId, { payload: updatedPayload })
+    
+                } catch (error) {
+
+                    const code = error?.code ?? ""
+                    const message = error?.message ?? "Script task failed"
+
+                    rejectJob(jobId, { code, message })
+                }
+    
+            } else {
+                jobsSubject.next(job)
+            }
         }
     }
 
@@ -156,16 +243,19 @@ export const createOrchestrator = (process: Process): Orchestrator => {
 
         const correlationId = createID()
 
-        startNextJob(correlationId, startEvent.next, initialPayload)
-
         return new Promise<Payload>((resolve, reject) => {
+
             processCompletions[correlationId] = { resolve, reject }
+
+            startNextJob(correlationId, startEvent.next, initialPayload)
         })
     }
 
     const resolveJob = (jobId: string, { payload = {} } = {}) => {
 
         const job = activeJobs.find(job => job.id === jobId)
+
+        activeJobs = activeJobs.filter(job => job.id !== jobId)
 
         if (job === undefined) {
             throw new Error(`Job with ID '${jobId}' does not exist.`)
@@ -185,6 +275,8 @@ export const createOrchestrator = (process: Process): Orchestrator => {
     const rejectJob = (jobId: string, { code = "", message = "" } = {}) => {
 
         const job = activeJobs.find(job => job.id === jobId)
+
+        activeJobs = activeJobs.filter(job => job.id !== jobId)
 
         if (job === undefined) {
             throw new Error(`Job with ID '${jobId}' does not exist.`)
